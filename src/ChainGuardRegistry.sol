@@ -16,9 +16,21 @@ contract ChainGuardRegistry is AccessControl {
         uint256 timestamp;
     }
 
+    event AuditPublished(
+        uint256 indexed auditId,
+        address indexed contractAddress,
+        address indexed auditor,
+        bytes32 reportHash,
+        uint8 score
+    );
+
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    
+    function publishAudit(bytes32 reportHash, address contractAddress, uint8 score) public onlyRole(AUDITOR_ROLE) {
+        uint256 auditId = ++auditCount;
+        audits[auditId] = AuditRecord(reportHash, contractAddress, score, msg.sender, block.timestamp);
+        emit AuditPublished(auditId, contractAddress, msg.sender, reportHash, score);
+    }
 }
